@@ -80,8 +80,15 @@ class CSVInputApp:
             self.df = pd.read_csv(file_path, sep=cell_separator, decimal=decimal_denoter)
             self.print_to_status_bar("Data loaded successfully.")
             print(self.df)
+        except FileNotFoundError:
+            error_message = "Error: File not found."
+        except pd.errors.EmptyDataError:
+            error_message = "Error: The file is empty."
+        except pd.errors.ParserError:
+            error_message = "Error: Failed to parse the CSV file."
         except Exception as e:
-            error_message = f"Error: {e}"
+            error_message = f"Unexpected error: {e}"
+        finally:
             self.print_to_status_bar(error_message)
             print(error_message)
 
