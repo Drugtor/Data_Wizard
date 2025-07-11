@@ -104,7 +104,7 @@ class CSVInputApp:
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
 
-        sns.set_theme(style="whitegrid")
+        sns.set_theme(style="darkgrid")
 
     def browse_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
