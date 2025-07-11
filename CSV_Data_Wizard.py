@@ -188,7 +188,7 @@ class CSVInputApp:
                 melted = self.df.melt(id_vars=x, var_name="Variable", value_name="Value")
                 sns.boxplot(data=melted, x="Variable", y="Value", ax=ax)
             elif plot_type == "Heatmap":
-                sns.heatmap(self.df.corr(numeric_only=True), cmap="viridis", ax=ax, annot=True)
+                sns.heatmap(self.df.corr(numeric_only=True), cmap="rocket", ax=ax, annot=True)
 
             ax.set_title(plot_type)
             self.show_plot(fig)
