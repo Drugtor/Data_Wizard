@@ -7,9 +7,14 @@ This is not meant for in depth analysis. Just a quick overview of raw data so yo
 ### Work in Progress ###
 Currently halted due to other Projects.
 
-Future Plans: > Export as jpg
+Future Plans: 
+
+              > Export as jpg
+
               > Clean up UI
+              
               > Add Data Types
+              
               > Bug fixes for edge cases
               
 I might make this a selfcontained opensource App for private and academic use.
