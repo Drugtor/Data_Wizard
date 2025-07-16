@@ -180,7 +180,7 @@ class CSVInputApp:
                     sns.lineplot(data=self.df, x=x, y=y, ax=ax, label=y)
             elif plot_type == "Bar Chart":
                 for y in y_cols:
-                    sns.barplot(x=self.df[x], y=self.df[y], ax=ax, ci=None, label=y)
+                    sns.barplot(x=self.df[x], y=self.df[y], ax=ax, errorbar=None, label=y)
             elif plot_type == "Scatter Plot":
                 for y in y_cols:
                     sns.scatterplot(data=self.df, x=x, y=y, ax=ax, label=y)
