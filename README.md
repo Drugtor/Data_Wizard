@@ -10,8 +10,8 @@ Future Plans:
 
               > Clean up UI
               
-              > Add Data Types
+              > Add compatible Data Types
               
-              > Bug fixes for edge cases
+              > Bug fixes for edge cases (such as tick overflow when using time date for x axis)
               
 I might make this a selfcontained opensource App for private and academic use.
