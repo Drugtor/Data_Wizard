@@ -5,11 +5,8 @@ This is not meant for in depth analysis. Just a quick overview of raw data so yo
 
 
 ### Work in Progress ###
-Currently halted due to other Projects.
 
-Future Plans: 
-
-              > Export as jpg
+Future Plans:
 
               > Clean up UI
               
