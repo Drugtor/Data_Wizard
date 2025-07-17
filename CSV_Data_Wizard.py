@@ -6,12 +6,12 @@ It's barely optimised, but much better than my first version :)
 """
 import tkinter as tk
 from tkinter import ttk, filedialog
+import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
-import os
 
 
 class CSVInputApp:
@@ -56,8 +56,7 @@ class CSVInputApp:
         self.submit_button.grid(row=3, column=1, pady=20, sticky="W")
 
         self.input_tab.columnconfigure(1, weight=1)
-        self.input_tab.rowconfigure(3, weight=1)
-
+        
         # === Data View Tab ===
         self.data_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.data_tab, text="Data View")
@@ -85,8 +84,8 @@ class CSVInputApp:
         self.toolbar_container.create_window((0, 0), window=self.toolbar_frame, anchor="nw")
         self.toolbar_frame.bind("<Configure>", lambda e: self.toolbar_container.configure(scrollregion=self.toolbar_container.bbox("all")))
 
-        # Canvas + Scrollable Toolbar für Plot-Einstellungen
-        self.toolbar = self.toolbar_frame  # Alias für Klarheit – NICHT mit grid() verwenden
+        # Toolbar-Frame als logische Referenz
+        self.toolbar = self.toolbar_frame
 
         tk.Label(self.toolbar, text="Plot Type:").pack(anchor="w")
         plot_types = ["Line Chart", "Bar Chart", "Heatmap", "Scatter Plot", "Box Plot"]
@@ -133,6 +132,9 @@ class CSVInputApp:
 
         self.plot_button = tk.Button(self.toolbar, text="Plot", command=self.plot_from_selection)
         self.plot_button.pack(anchor="s", fill="x", pady=(10, 0))
+
+        self.export_button = tk.Button(self.toolbar, text="Export as PNG", command=self.export_current_plot)
+        self.export_button.pack(anchor="s", fill="x", pady=(5, 10))
 
         self.plot_display = tk.Frame(self.plot_tab)
         self.plot_display.grid(row=0, column=1, rowspan=3, sticky="NSEW", padx=(10, 0), pady=5)
@@ -309,6 +311,23 @@ class CSVInputApp:
         """Entfernt alle vorherigen Diagramme aus dem Plot-Anzeigebereich."""
         for widget in self.plot_display.winfo_children():
             widget.destroy()
+
+    def export_current_plot(self):
+        """Exportiert den aktuellen Plot als PNG-Datei an benutzerdefiniertem Speicherort."""
+        try:
+            fig = plt.gcf()
+            default_name = "plot.png"
+            file_path = filedialog.asksaveasfilename(
+                initialfile=default_name,
+                defaultextension=".png",
+                filetypes=[("PNG files", "*.png")],
+                title="Save Plot As..."
+            )
+            if file_path:
+                fig.savefig(file_path, dpi=300, format="png")
+                self.print_to_status_bar(f"✅ Plot gespeichert: {os.path.basename(file_path)}")
+        except Exception as e:
+            self.print_to_status_bar(f"❌ Fehler beim Speichern: {e}")
 
     def print_to_status_bar(self, message):
         """Aktualisiert die Statusleiste mit einer Nachricht."""
