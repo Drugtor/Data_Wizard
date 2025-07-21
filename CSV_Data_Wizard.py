@@ -4,6 +4,7 @@ Created on Thu Jul 10 13:01:50 2025
 @author: Drugtor (mostly just via GPT promts with minor adjustments from me)
 It's barely optimised, but much better than my first version :)
 """
+
 import tkinter as tk
 from tkinter import ttk, filedialog
 import os
@@ -23,133 +24,130 @@ class CSVInputApp:
         self.selected_plot_type.trace_add("write", lambda *args: self.toggle_axis_limit_controls())
 
         self.master.geometry("1000x600")
+        self.master.rowconfigure(0, weight=1)
+        self.master.columnconfigure(0, weight=1)
 
         self.notebook = ttk.Notebook(master)
         self.notebook.grid(row=0, column=0, padx=10, pady=10, sticky="NSEW")
 
-        # === Input Tab ===
+        self.create_input_tab()
+        self.create_data_tab()
+        self.create_plot_tab()
+
+        self.status_var = tk.StringVar()
+        tk.Label(self.master, textvariable=self.status_var, font=("Helvetica", 10), bd=1, relief=tk.SUNKEN, anchor=tk.W).grid(row=1, column=0, sticky="EW")
+        sns.set_theme(style="darkgrid")
+
+    def create_input_tab(self):
         self.input_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.input_tab, text="Input")
-
-        self.file_path_label = tk.Label(self.input_tab, text="File Path:")
-        self.file_path_label.grid(row=0, column=0, padx=10, pady=10)
+        tk.Label(self.input_tab, text="File Path:").grid(row=0, column=0, padx=10, pady=10)
         self.file_path_entry = tk.Entry(self.input_tab, width=40)
         self.file_path_entry.grid(row=0, column=1, padx=10, pady=10, sticky="EW")
         self.file_path_entry.bind("<Return>", lambda e: self.process_data())
-
-        self.browse_button = tk.Button(self.input_tab, text="Browse", command=self.browse_file)
-        self.browse_button.grid(row=0, column=2, padx=10, pady=10)
-
-        self.decimal_label = tk.Label(self.input_tab, text="Decimal Denoter:")
-        self.decimal_label.grid(row=1, column=0, padx=10, pady=10)
+        tk.Button(self.input_tab, text="Browse", command=self.browse_file).grid(row=0, column=2, padx=10, pady=10)
+        tk.Label(self.input_tab, text="Decimal Denoter:").grid(row=1, column=0, padx=10, pady=10)
         self.decimal_entry = tk.Entry(self.input_tab, width=5)
         self.decimal_entry.grid(row=1, column=1, padx=10, pady=10, sticky="W")
         self.decimal_entry.bind("<Return>", lambda e: self.process_data())
-
-        self.separator_label = tk.Label(self.input_tab, text="Cell Separator:")
-        self.separator_label.grid(row=2, column=0, padx=10, pady=10)
+        tk.Label(self.input_tab, text="Cell Separator:").grid(row=2, column=0, padx=10, pady=10)
         self.separator_entry = tk.Entry(self.input_tab, width=5)
         self.separator_entry.grid(row=2, column=1, padx=10, pady=10, sticky="W")
         self.separator_entry.bind("<Return>", lambda e: self.process_data())
-
-        self.submit_button = tk.Button(self.input_tab, text="Submit", command=self.process_data)
-        self.submit_button.grid(row=3, column=1, pady=20, sticky="W")
-
+        tk.Button(self.input_tab, text="Submit", command=self.process_data).grid(row=3, column=1, pady=20, sticky="W")
         self.input_tab.columnconfigure(1, weight=1)
-        
-        # === Data View Tab ===
+
+    def create_data_tab(self):
         self.data_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.data_tab, text="Data View")
-        self.notebook.insert(1, self.data_tab)
-
         self.tree = ttk.Treeview(self.data_tab, show="headings")
         self.tree.grid(row=0, column=0, sticky="NSEW")
-
-        self.vsb = ttk.Scrollbar(self.data_tab, orient="vertical", command=self.tree.yview)
-        self.vsb.grid(row=0, column=1, sticky="NS")
-        self.hsb = ttk.Scrollbar(self.data_tab, orient="horizontal", command=self.tree.xview)
-        self.hsb.grid(row=1, column=0, sticky="EW")
-        self.tree.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
-
+        vsb = ttk.Scrollbar(self.data_tab, orient="vertical", command=self.tree.yview)
+        vsb.grid(row=0, column=1, sticky="NS")
+        hsb = ttk.Scrollbar(self.data_tab, orient="horizontal", command=self.tree.xview)
+        hsb.grid(row=1, column=0, sticky="EW")
+        self.tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
         self.data_tab.columnconfigure(0, weight=1)
         self.data_tab.rowconfigure(0, weight=1)
 
-        # === Plot Tab ===
+    def create_plot_tab(self):
         self.plot_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.plot_tab, text="Plots")
+        self.plot_tab.rowconfigure(0, weight=1)
+        self.plot_tab.columnconfigure(2, weight=1)
 
-        self.toolbar_container = tk.Canvas(self.plot_tab, borderwidth=0, width=240, background="#d4d0c8")
-        self.toolbar_frame = tk.Frame(self.toolbar_container, bg="#d4d0c8", relief="groove", bd=2, width=240)
-        self.toolbar_container.grid(row=0, column=0, rowspan=3, sticky="NS", padx=(0, 5), pady=5)
+        self.toolbar_container = tk.Canvas(self.plot_tab, borderwidth=0, width=260, background="#d4d0c8", highlightthickness=0)
+        self.toolbar_scroll = tk.Scrollbar(self.plot_tab, orient="vertical", command=self.toolbar_container.yview)
+        self.toolbar_container.configure(yscrollcommand=self.toolbar_scroll.set)
+        self.toolbar_container.grid(row=0, column=1, sticky="NSW", padx=(0, 0), pady=0)
+        self.toolbar_scroll.grid(row=0, column=0, sticky="NS")
+
+        self.toolbar_frame = tk.Frame(self.toolbar_container, bg="#d4d0c8", relief="groove", bd=2)
         self.toolbar_container.create_window((0, 0), window=self.toolbar_frame, anchor="nw")
         self.toolbar_frame.bind("<Configure>", lambda e: self.toolbar_container.configure(scrollregion=self.toolbar_container.bbox("all")))
 
-        # Toolbar-Frame als logische Referenz
-        self.toolbar = self.toolbar_frame
-
-        tk.Label(self.toolbar, text="Plot Type:").pack(anchor="w")
-        plot_types = ["Line Chart", "Bar Chart", "Heatmap", "Scatter Plot", "Box Plot"]
-        for plot_type in plot_types:
-            rb = tk.Radiobutton(self.toolbar, text=plot_type, variable=self.selected_plot_type, value=plot_type)
-            rb.pack(anchor="w")
-
-        tk.Label(self.toolbar, text="X-Axis:").pack(anchor="w")
-        self.x_axis_combo = ttk.Combobox(self.toolbar, state="readonly")
-        self.x_axis_combo.pack(fill="x")
-
-        tk.Label(self.toolbar, text="Y-Axis (multiple):").pack(anchor="w")
-        self.y_axis_listbox = tk.Listbox(self.toolbar, selectmode="multiple", exportselection=0, height=5)
-        self.y_axis_listbox.pack(fill="x")
-
-        tk.Label(self.toolbar, text="Plot Title:").pack(anchor="w")
-        self.title_entry = tk.Entry(self.toolbar)
-        self.title_entry.pack(fill="x")
-        self.title_entry.bind("<Return>", lambda e: self.plot_from_selection())
-
-        tk.Label(self.toolbar, text="X Label:").pack(anchor="w")
-        self.xlabel_entry = tk.Entry(self.toolbar)
-        self.xlabel_entry.pack(fill="x")
-
-        tk.Label(self.toolbar, text="Y Label:").pack(anchor="w")
-        self.ylabel_entry = tk.Entry(self.toolbar)
-        self.ylabel_entry.pack(fill="x")
-
-        tk.Label(self.toolbar, text="X Min / Max:").pack(anchor="w")
-        self.xmin_entry = tk.Entry(self.toolbar, width=8)
-        self.xmin_entry.pack(fill="x")
-        self.xmax_entry = tk.Entry(self.toolbar, width=8)
-        self.xmax_entry.pack(fill="x")
-
-        tk.Label(self.toolbar, text="Y Min / Max:").pack(anchor="w")
-        self.ymin_entry = tk.Entry(self.toolbar, width=8)
-        self.ymin_entry.pack(fill="x")
-        self.ymax_entry = tk.Entry(self.toolbar, width=8)
-        self.ymax_entry.pack(fill="x")
-
-        self.auto_scale_var = tk.BooleanVar(value=True)
-        self.auto_scale_check = tk.Checkbutton(self.toolbar, text="Auto Scale", variable=self.auto_scale_var, command=self.toggle_axis_limit_controls)
-        self.auto_scale_check.pack(anchor="w")
-
-        self.plot_button = tk.Button(self.toolbar, text="Plot", command=self.plot_from_selection)
-        self.plot_button.pack(anchor="s", fill="x", pady=(10, 0))
-
-        self.export_button = tk.Button(self.toolbar, text="Export as PNG", command=self.export_current_plot)
-        self.export_button.pack(anchor="s", fill="x", pady=(5, 10))
+        self.create_toolbar_sections()
 
         self.plot_display = tk.Frame(self.plot_tab)
-        self.plot_display.grid(row=0, column=1, rowspan=3, sticky="NSEW", padx=(10, 0), pady=5)
+        self.plot_display.grid(row=0, column=2, sticky="NSEW", padx=(5, 0), pady=5)
 
-        self.plot_tab.rowconfigure(2, weight=1)
-        self.plot_tab.columnconfigure(1, weight=1)
+    def create_toolbar_sections(self):
+        """ Plottypen können hier ausgewählt werden """
+        plot_type_frame = tk.LabelFrame(self.toolbar_frame, text="Plot Type")
+        plot_type_frame.pack(fill="x", pady=5)
+        for pt in ["Line Chart", "Bar Chart", "Heatmap", "Scatter Plot", "Box Plot"]:
+            tk.Radiobutton(plot_type_frame, text=pt, variable=self.selected_plot_type, value=pt).pack(anchor="w")
 
-        self.status_var = tk.StringVar()
-        self.status_bar = tk.Label(self.master, textvariable=self.status_var, font=("Helvetica", 10), bd=1, relief=tk.SUNKEN, anchor=tk.W)
-        self.status_bar.grid(row=1, column=0, sticky="EW")
+        """ Achsen optionen in einem eigenen Frame """
+        axes_frame = tk.LabelFrame(self.toolbar_frame, text="Axes")
+        axes_frame.pack(fill="x", pady=5)
+        
+        tk.Label(axes_frame, text="X-Axis:").pack(anchor="w")
+        self.x_axis_combo = ttk.Combobox(axes_frame, state="readonly")
+        self.x_axis_combo.pack(fill="x")
+        
+        tk.Label(axes_frame, text="Y-Axis (multiple):").pack(anchor="w")
+        self.y_axis_listbox = tk.Listbox(axes_frame, selectmode="multiple", exportselection=0, height=5)
+        self.y_axis_listbox.pack(fill="x")
+        self.auto_scale_var = tk.BooleanVar(value=True)
+       
+        tk.Checkbutton(axes_frame, text="Auto Scale", variable=self.auto_scale_var, command=self.toggle_axis_limit_controls).pack(anchor="w")
+        limits_frame = tk.Frame(axes_frame)
+        limits_frame.pack(fill="x", pady=(5, 0))
+        
+        tk.Label(limits_frame, text="X Limits:").grid(row=0, column=0, sticky="w")
+        self.xmin_entry = tk.Entry(limits_frame, width=8)
+        self.xmin_entry.grid(row=0, column=1, padx=2)
+        self.xmax_entry = tk.Entry(limits_frame, width=8)
+        self.xmax_entry.grid(row=0, column=2, padx=2)
+        
+        tk.Label(limits_frame, text="Y Limits:").grid(row=1, column=0, sticky="w")
+        self.ymin_entry = tk.Entry(limits_frame, width=8)
+        self.ymin_entry.grid(row=1, column=1, padx=2)
+        self.ymax_entry = tk.Entry(limits_frame, width=8)
+        self.ymax_entry.grid(row=1, column=2, padx=2)
 
-        self.master.grid_rowconfigure(0, weight=1)
-        self.master.grid_columnconfigure(0, weight=1)
-
-        sns.set_theme(style="whitegrid")
+        """ Label optionen (Titel und Achsen) in einem eigenen Frame """
+        labels_frame = tk.LabelFrame(self.toolbar_frame, text="Labels")
+        labels_frame.pack(fill="x", pady=5)
+        
+        tk.Label(labels_frame, text="Plot Title:").pack(anchor="w")
+        self.title_entry = tk.Entry(labels_frame)
+        self.title_entry.pack(fill="x")
+        
+        tk.Label(labels_frame, text="X Label:").pack(anchor="w")
+        self.xlabel_entry = tk.Entry(labels_frame)
+        self.xlabel_entry.pack(fill="x")
+        
+        tk.Label(labels_frame, text="Y Label:").pack(anchor="w")
+        self.ylabel_entry = tk.Entry(labels_frame)
+        self.ylabel_entry.pack(fill="x")
+        
+        """ Plot und Export buttons """
+        actions_frame = tk.LabelFrame(self.toolbar_frame, text="Actions")
+        actions_frame.pack(fill="x", pady=5)
+        tk.Button(actions_frame, text="Plot", command=self.plot_from_selection).pack(side="left", expand=True, fill="x", padx=2, pady=2)
+        tk.Button(actions_frame, text="Export as PNG", command=self.export_current_plot).pack(side="left", expand=True, fill="x", padx=2, pady=2)
 
     def browse_file(self):
         """Öffnet einen Dateidialog zur Auswahl einer CSV-Datei und trägt den Pfad in das Eingabefeld ein."""
