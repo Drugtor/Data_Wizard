@@ -1,6 +1,6 @@
 # Data_visualisation
 My Visualisation Project for quick and dirty data science
-This Version includes support for multiple Filetypes / CSV encodings (not bug tested yet).
+This Version includes support for multiple Filetypes / CSV encodings.
 This is not meant for in depth analysis. Just a quick overview of raw data so you can get an idea of the results of your experiment.
 
 
