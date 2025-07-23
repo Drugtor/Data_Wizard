@@ -14,6 +14,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
+from datetime import date
 
 
 """ Initial def. of the app window type and the tabs inside"""
@@ -368,8 +369,10 @@ class CSVInputApp:
     """ Exports the current plot as a png in a user defined directory """
     def export_current_plot(self):
         try:
+            file_title = self.title_entry.get()
+            today = str(date.today())
             fig = plt.gcf()
-            default_name = "plot.png"
+            default_name = f"{today}-{file_title}.png"
             file_path = filedialog.asksaveasfilename(
                 initialfile=default_name,
                 defaultextension=".png",
