@@ -1,8 +1,27 @@
 """
-Created on Thu Jul 10 13:01:50 2025
+'Data Wizard'
+This Software is made for opensource data visualisation, using a variety data formats and simple GUI.
+Copyright (C) 2025 Drugtor
 
-@author: Drugtor (mostly just via GPT promts with minor adjustments from me)
-It's barely optimised, but much better than my first version :)
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
 """
 
 """ Packages used for this application """
