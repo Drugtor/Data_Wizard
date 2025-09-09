@@ -44,8 +44,11 @@ class CSVInputApp:
         self.df = None
         self.selected_plot_type = tk.StringVar(value="Line Chart")
         self.selected_plot_type.trace_add("write", lambda *args: self.toggle_axis_limit_controls())
+        self.recent_files = []
 
-        self.master.geometry("1000x600")
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        self.master.geometry(f"{screen_width}x{screen_height}+0+0")
         self.master.rowconfigure(0, weight=1)
         self.master.columnconfigure(0, weight=1)
 
@@ -60,9 +63,10 @@ class CSVInputApp:
         """ Creating the statusbar on the bottom of the window """
         self.status_var = tk.StringVar()
         tk.Label(self.master, textvariable=self.status_var, font=("Helvetica", 10), bd=1, relief=tk.SUNKEN, anchor=tk.W).grid(row=1, column=0, sticky="EW")
+        
         sns.set_theme(style="darkgrid") #style of the plots in seaborn
-
-
+        
+        
     """ The input tab for selecting the CSV file  """
     def create_input_tab(self):
         self.input_tab = ttk.Frame(self.notebook)
@@ -95,10 +99,15 @@ class CSVInputApp:
         self.encoding_entry.insert(0, "utf-8")
 
         tk.Button(self.input_tab, text="Submit", command=self.process_data).grid(row=4, column=1, pady=20, sticky="W")
+
+        tk.Label(self.input_tab, text="Zuletzt geöffnet:").grid(row=5, column=0, padx=10, pady=10)
+        self.recent_files_combo = ttk.Combobox(self.input_tab, values=self.recent_files, state="readonly", width=40)
+        self.recent_files_combo.grid(row=5, column=1, padx=10, pady=10, sticky="EW")
+        self.recent_files_combo.bind("<<ComboboxSelected>>", self.load_recent_file)
         self.input_tab.columnconfigure(1, weight=1)
 
 
-    """ A simple data review Tab so one can see what pandas made of their CSV """
+    """ A simple data review Tab so one can see what pandas made of their file """
     def create_data_tab(self):
         self.data_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.data_tab, text="Data View")
@@ -120,14 +129,14 @@ class CSVInputApp:
         self.plot_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.plot_tab, text="Plots")
         self.plot_tab.rowconfigure(0, weight=1)
-        self.plot_tab.columnconfigure(2, weight=1)
+        self.plot_tab.columnconfigure(1, weight=1)
         
         """ The toolbar with its scrollbar in column 0 and 1 """
-        self.toolbar_container = tk.Canvas(self.plot_tab, borderwidth=0, width=260, background="#d4d0c8", highlightthickness=0)
+        self.toolbar_container = tk.Canvas(self.plot_tab, borderwidth=0, width=271, background="#d4d0c8", highlightthickness=0)
         self.toolbar_scroll = tk.Scrollbar(self.plot_tab, orient="vertical", command=self.toolbar_container.yview)
         self.toolbar_container.configure(yscrollcommand=self.toolbar_scroll.set)
-        self.toolbar_container.grid(row=0, column=1, sticky="NSW", padx=(0, 0), pady=0)
-        self.toolbar_scroll.grid(row=0, column=0, sticky="NS")
+        self.toolbar_container.grid(row=0, column=0, sticky="NSW", padx=(0, 0), pady=0)
+        self.toolbar_scroll.grid(row=0, column=0, sticky="NSE")
         
         """ Design of the Toolbar in the style of Windows XP """
         self.toolbar_frame = tk.Frame(self.toolbar_container, bg="#d4d0c8", relief="groove", bd=2)
@@ -138,7 +147,7 @@ class CSVInputApp:
         
         """ The plotting canvas in column 2 """
         self.plot_display = tk.Frame(self.plot_tab)
-        self.plot_display.grid(row=0, column=2, sticky="NSEW", padx=(5, 0), pady=5)
+        self.plot_display.grid(row=0, column=1, sticky="NSEW", padx=(5, 0), pady=5)
 
     """ Subsections of the toolbar """
     def create_toolbar_sections(self):
@@ -157,7 +166,7 @@ class CSVInputApp:
         self.x_axis_combo.pack(fill="x")
         
         tk.Label(axes_frame, text="Y-Axis (multiple):").pack(anchor="w")
-        self.y_axis_listbox = tk.Listbox(axes_frame, selectmode="multiple", exportselection=0, height=5)
+        self.y_axis_listbox = tk.Listbox(axes_frame, selectmode="multiple", exportselection=0, height=8)
         self.y_axis_listbox.pack(fill="x")
         self.auto_scale_var = tk.BooleanVar(value=True)
         
@@ -201,6 +210,15 @@ class CSVInputApp:
 
 
     """Opens a dialog window for choosing a file and copying the path in the text box"""
+
+    def load_recent_file(self, event=None):
+        selected_file = self.recent_files_combo.get()
+        if selected_file:
+            self.file_path_entry.delete(0, tk.END)
+            self.file_path_entry.insert(0, selected_file)
+            self.process_data()
+
+
     def browse_file(self):
        file_path = filedialog.askopenfilename(
            filetypes=[
@@ -213,9 +231,13 @@ class CSVInputApp:
        if file_path:
            self.file_path_entry.delete(0, tk.END)
            self.file_path_entry.insert(0, file_path)
+           if file_path not in self.recent_files:
+               self.recent_files.insert(0, file_path)
+               self.recent_files = self.recent_files[:5]
+               self.recent_files_combo["values"] = self.recent_files
 
 
-    """ Reads the CSV file with the userdefined (or default) denoters and shows it in the data tab.
+    """ Reads the file with the userdefined (or default) denoters and shows it in the data tab.
     Additionally it also displays the axis options for plotting"""
     def process_data(self):
        file_path = self.file_path_entry.get()
@@ -264,7 +286,7 @@ class CSVInputApp:
             self.tree.insert("", "end", values=list(row))
         
     
-    """ Fills the the axis selction with the column names from the data only numeric for Y axis """
+    """ Fills the the axis selction with the column names from the data (only numeric columns for Y axis) """
     def populate_axis_selectors(self):
         if self.df is None:
             return
@@ -364,7 +386,7 @@ class CSVInputApp:
                     if ymin is not None or ymax is not None:
                         ax.set_ylim(ymin, ymax)
             except ValueError:
-                self.print_to_status_bar("⚠️ Ungültige Achsengrenzen oder Min >= Max. Ignoriert.")
+                self.print_to_status_bar("⚠️ Ungültige Achsengrenzen, oder Min >= Max. Ignoriert.")
                 self.print_to_status_bar("⚠️ Ungültiger Zahlenwert für Achsenlimits. Ignoriert.")
 
             self.show_plot(fig)
@@ -385,7 +407,8 @@ class CSVInputApp:
         for widget in self.plot_display.winfo_children():
             widget.destroy()
 
-    """ Exports the current plot as a png in a user defined directory """
+    """ Exports the current plot as a png in a user defined directory.
+    The filename consists of the current date and the def title."""    
     def export_current_plot(self):
         try:
             file_title = self.title_entry.get()
