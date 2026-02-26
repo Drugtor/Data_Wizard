@@ -3,7 +3,7 @@ My Visualisation Project for quick and dirty data science
 This Version includes support for multiple Filetypes / CSV encodings.
 This is not meant for in depth analysis. Just a quick overview of raw data so you can get an idea of the results of your experiment.
 
-Project has been split into multiple sub files for easier 
+Project has been split into multiple sub files for easier handling
 
 
 ### Work in Progress ###
